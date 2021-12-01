@@ -8,20 +8,58 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var emojiCount = 6
+    var emojis = ["👻", "💀", "👽", "🤖", "👾", "🕸", "🦕", "👑", "🌴", "🌍","🌈", "🚜", "🏀"]
     var body: some View {
-        HStack {
-            CardView()
-            CardView()
-            CardView()
-            CardView()
+        VStack {
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))]) {
+                    ForEach(emojis[0..<emojiCount], id: \.self) { emoji in
+                        CardView(content: emoji).aspectRatio(2/3, contentMode: .fit)
+                    }
+                }
+            }
+            .foregroundColor(.purple)
+            Spacer()
+            HStack {
+                removeCard
+                Spacer()
+                addCard
+            }
+            .font(.largeTitle)
+            .padding(.horizontal)
         }
         .padding(.horizontal)
-        .foregroundColor(.purple)
+    }
+    
+    var removeCard: some View {
+        Button {
+            if emojiCount > 1 {
+                emojiCount -= 1
+            }
+        } label: {
+            VStack {
+                Image(systemName: "minus.circle")
+            }
+        }
+    }
+    
+    var addCard: some View {
+        Button {
+            if emojiCount < emojis.count {
+                emojiCount += 1
+            }
+        } label: {
+            VStack {
+                Image(systemName: "plus.circle")
+            }
+        }
     }
 }
 
 struct CardView: View {
-    var isFaceUp: Bool = true
+    var content: String
+    @State var isFaceUp: Bool = true
     
     var body: some View {
         ZStack {
@@ -29,11 +67,14 @@ struct CardView: View {
 
             if isFaceUp {
                 cardShape.fill().foregroundColor(.white)
-                cardShape.stroke(lineWidth: 2)
-                Text("👻").font(.largeTitle)
+                cardShape.strokeBorder(lineWidth: 3)
+                Text(content).font(.largeTitle)
             }else {
                 cardShape.fill()
             }
+        }
+        .onTapGesture {
+            isFaceUp = !isFaceUp
         }
     }
 }
