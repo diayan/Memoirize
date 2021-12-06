@@ -7,12 +7,13 @@
 
 import SwiftUI
 
+//Observable object broadcasts when something changes
 //This is the view model. The view model is part of the UI and so we are importing swiftui. Note: it is not part of the View 
-class EmojiMemoryGame {
+class EmojiMemoryGame: ObservableObject {
     //this is called a type property. It is created once
     static let emojis = ["👻", "💀", "👽", "🤖", "👾", "🕸", "🦕", "👑", "🌴", "🌍","🌈", "🚜", "🏀"]
 
-    private var model: MemoirizeGame<String> = EmojiMemoryGame.createMemoryGame()
+    @Published private var model: MemoirizeGame<String> = EmojiMemoryGame.createMemoryGame()
 
     //this is an instance variable so it is create every time you create an EmojiMemoryGame
     var cards: Array<MemoirizeGame<String>.Card> {
@@ -24,5 +25,11 @@ class EmojiMemoryGame {
         MemoirizeGame<String>(numberOfPairsOfCards: 4) { pairIndex in
             EmojiMemoryGame.emojis[pairIndex]
         }
+    }
+    
+    // MARK: - Intent(s)
+    func choose(_ card: MemoirizeGame<String>.Card) {
+        objectWillChange.send()
+        model.choose(card)
     }
 }
