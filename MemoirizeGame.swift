@@ -16,6 +16,7 @@ struct MemoirizeGame<CardContent> {
         
     }
     
+    //we create this initialiser because we want every game to start by creating the cards
     init(numberOfPairsOfCards: Int, createCardContent: (Int) -> CardContent) {
         cards = Array<Card>()
         //add numberOfPairsOfCards x 2 to cards array

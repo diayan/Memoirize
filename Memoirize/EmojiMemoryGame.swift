@@ -7,20 +7,22 @@
 
 import SwiftUI
 
-//This is the view model. The view model is part of the UI and so we are importing swiftui
+//This is the view model. The view model is part of the UI and so we are importing swiftui. Note: it is not part of the View 
 class EmojiMemoryGame {
-    static var emojis = ["👻", "💀", "👽", "🤖", "👾", "🕸", "🦕", "👑", "🌴", "🌍","🌈", "🚜", "🏀"]
+    //this is called a type property. It is created once
+    static let emojis = ["👻", "💀", "👽", "🤖", "👾", "🕸", "🦕", "👑", "🌴", "🌍","🌈", "🚜", "🏀"]
 
+    private var model: MemoirizeGame<String> = EmojiMemoryGame.createMemoryGame()
+
+    //this is an instance variable so it is create every time you create an EmojiMemoryGame
+    var cards: Array<MemoirizeGame<String>.Card> {
+        return model.cards
+    }
     
+    //this is called a type function
     static func createMemoryGame() -> MemoirizeGame<String> {
         MemoirizeGame<String>(numberOfPairsOfCards: 4) { pairIndex in
             EmojiMemoryGame.emojis[pairIndex]
         }
-    }
-     
-    private var model: MemoirizeGame<String> = EmojiMemoryGame.createMemoryGame()
-    
-    var cards: Array<MemoirizeGame<String>.Card> {
-        return model.cards
     }
 }
