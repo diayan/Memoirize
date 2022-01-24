@@ -11,11 +11,11 @@ import UIKit
 struct MemoirizeGame<CardContent> where CardContent: Equatable {
     private(set)  var cards: Array<Card> //the game is made up of cards
     
-    //NOTE: a card can only match if and only if there is already one card that is facing up when you click another card
+    //MARK: NOTE: a card can only match if and only if there is already one card that is facing up when you click another card
     private var indexOfOneAndOnlyOneFaceUpCard: Int? //optional because when you start the game the cards are all turned down initially
 
     
-    //a user can choose a card
+    //MARK: a user can choose a card
     mutating func choose(_ card: Card) {
         //Note we actually want to change the cards in the array above. So we have to find the card in this function in the cards above
 //        if let chosenIndex = indexOf(of: card) {
@@ -57,10 +57,10 @@ struct MemoirizeGame<CardContent> where CardContent: Equatable {
 //        return nil
 //    }
     
-    //we create this initialiser because we want every game to start by creating the cards
+    //MARK: we create this initialiser because we want every game to start by creating the cards
     init(numberOfPairsOfCards: Int, createCardContent: (Int) -> CardContent) {
         cards = Array<Card>()
-        //add numberOfPairsOfCards x 2 to cards array
+        //MARK: add numberOfPairsOfCards x 2 to cards array
         for pairIndex in 0..<numberOfPairsOfCards {
             let content = createCardContent(pairIndex)
             cards.append(Card(id: pairIndex*2, content: content))
@@ -68,12 +68,12 @@ struct MemoirizeGame<CardContent> where CardContent: Equatable {
         }
     }
     
+    //MARK: Identifiable is an identifier that is able to distinguish between each card
     struct Card: Identifiable {
-        var id: Int
-        //every game starts off with card faces down and not matched so set default values of the two to false
+        let id: Int
+        //MARK: every game starts off with card faces down and not matched so set default values of the two to false
         var isFaceUp: Bool = false
         var isMatched: Bool = false
-        var content: CardContent //the content of a card can be anything. i.e emoji, image, an object of any type
-        
+        let content: CardContent //the content of a card can be anything. i.e emoji, image, an object of any type
     }
 }
