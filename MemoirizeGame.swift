@@ -12,7 +12,11 @@ struct MemoirizeGame<CardContent> where CardContent: Equatable {
     private(set)  var cards: Array<Card> //the game is made up of cards
     
     //MARK: NOTE: a card can only match if and only if there is already one card that is facing up when you click another card
-    private var indexOfOneAndOnlyOneFaceUpCard: Int? //optional because when you start the game the cards are all turned down initially
+    //optional because when you start the game the cards are all turned down initially
+    private var indexOfOneAndOnlyOneFaceUpCard: Int? {
+        get { return cards.indices.filter({cards[$0].isFaceUp}).oneAndOnly }
+        set { cards.indices.forEach { cards[$0].isFaceUp = ($0 == newValue) }}
+    }
 
     
     //MARK: a user can choose a card
@@ -35,16 +39,10 @@ struct MemoirizeGame<CardContent> where CardContent: Equatable {
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
                 }
-                indexOfOneAndOnlyOneFaceUpCard = nil
+                cards[chosenIndex].isFaceUp = true
             } else {
-                // 0..<cards.count == cards.indices
-                for index in cards.indices {
-                    cards[index].isFaceUp = false
-                }
                 indexOfOneAndOnlyOneFaceUpCard = chosenIndex
             }
-            cards[chosenIndex].isFaceUp.toggle()
-            print("chosenCard \(cards)")
         }
     }
     
@@ -59,7 +57,7 @@ struct MemoirizeGame<CardContent> where CardContent: Equatable {
     
     //MARK: we create this initialiser because we want every game to start by creating the cards
     init(numberOfPairsOfCards: Int, createCardContent: (Int) -> CardContent) {
-        cards = Array<Card>()
+        cards = []
         //MARK: add numberOfPairsOfCards x 2 to cards array
         for pairIndex in 0..<numberOfPairsOfCards {
             let content = createCardContent(pairIndex)
@@ -72,8 +70,19 @@ struct MemoirizeGame<CardContent> where CardContent: Equatable {
     struct Card: Identifiable {
         let id: Int
         //MARK: every game starts off with card faces down and not matched so set default values of the two to false
-        var isFaceUp: Bool = false
-        var isMatched: Bool = false
+        var isFaceUp = false
+        var isMatched = false
         let content: CardContent //the content of a card can be anything. i.e emoji, image, an object of any type
+    }
+}
+
+
+extension Array {
+    var oneAndOnly: Element? {
+        if self.count == 1 {
+            return self.first
+        }else {
+            return nil
+        }
     }
 }

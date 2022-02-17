@@ -10,11 +10,11 @@ import SwiftUI
 @main
 struct MemoirizeApp: App {
     //this creates the game and injects it into the content view 
-    let game = EmojiMemoryGameViewModel()
+    private let game = EmojiMemoryGameViewModel()
     
     var body: some Scene {
         WindowGroup {
-            EmojiMemoryGameView(viewModel: game)
+            EmojiMemoryGameView(gameViewModel: game)
         }
     }
 }

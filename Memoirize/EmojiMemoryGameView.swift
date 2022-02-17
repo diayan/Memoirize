@@ -9,16 +9,16 @@ import SwiftUI
 
 struct EmojiMemoryGameView: View {
     //MARK: @ObservedObject says whenever something changes in this view model, rebuild the entire view 
-    @ObservedObject var viewModel: EmojiMemoryGameViewModel //this will be injected everywhere we create the EmojiMemoryGameView view
+    @ObservedObject var gameViewModel: EmojiMemoryGameViewModel //this will be injected everywhere we create the EmojiMemoryGameView view
         
     var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
-                ForEach(viewModel.cards) { card in
+                ForEach(gameViewModel.cards) { card in
                     CardView(card: card)
                         .aspectRatio(2/3, contentMode: .fit)
                         .onTapGesture {
-                            viewModel.choose(card)
+                            gameViewModel.choose(card)
                         }
                 }
             }
@@ -31,7 +31,7 @@ struct EmojiMemoryGameView: View {
 //When you build a view, only parse in it the minimum it needs to do it's job
 struct CardView: View {
     //We pass only the card here because that is the only thing the CardView needs to do its job i.e to display a card
-    let card: MemoirizeGame<String>.Card
+    let card: EmojiMemoryGameViewModel.Card
     
     var body: some View {
         ZStack {
@@ -53,9 +53,9 @@ struct CardView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         let game = EmojiMemoryGameViewModel()
-        EmojiMemoryGameView(viewModel: game)
+        EmojiMemoryGameView(gameViewModel: game)
             .preferredColorScheme(.dark)
-        EmojiMemoryGameView(viewModel: game)
+        EmojiMemoryGameView(gameViewModel: game)
             .preferredColorScheme(.light)
     }
 }
