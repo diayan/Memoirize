@@ -70,7 +70,7 @@ struct MemoirizeGame<CardContent> where CardContent: Equatable {
     struct Card: Identifiable {
         let id: Int
         //MARK: every game starts off with card faces down and not matched so set default values of the two to false
-        var isFaceUp = false
+        var isFaceUp = true
         var isMatched = false
         let content: CardContent //the content of a card can be anything. i.e emoji, image, an object of any type
     }
