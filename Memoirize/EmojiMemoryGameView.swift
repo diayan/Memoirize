@@ -12,19 +12,22 @@ struct EmojiMemoryGameView: View {
     @ObservedObject var gameViewModel: EmojiMemoryGameViewModel //this will be injected everywhere we create the EmojiMemoryGameView view
         
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))]) {
-                ForEach(gameViewModel.cards) { card in
-                    CardView(card: card)
-                        .aspectRatio(2/3, contentMode: .fit)
-                        .onTapGesture {
-                            gameViewModel.choose(card)
-                        }
+        //        ScrollView {
+        //            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))]) {
+        //                ForEach(gameViewModel.cards) { card in
+        AspectVGrid(items: gameViewModel.cards, aspectRatio: 2/3, content: { card in
+            CardView(card: card)
+                .padding(4)
+                .onTapGesture {
+                    gameViewModel.choose(card)
                 }
-            }
-        }
-        .foregroundColor(.purple)
-        .padding(.horizontal)
+        })
+        
+        //                }
+        //            }
+        //        }
+            .foregroundColor(.purple)
+            .padding(.horizontal)
     }
 }
 
@@ -56,9 +59,9 @@ struct CardView: View {
     }
     
     private struct DrawingConstants {
-        static let cornerRadius: CGFloat = 20
+        static let cornerRadius: CGFloat = 10
         static let lineWidth: CGFloat = 3
-        static let fontScaleFactor: CGFloat = 0.8
+        static let fontScaleFactor: CGFloat = 0.75
      }
 }
 

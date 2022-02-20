@@ -14,7 +14,7 @@ class EmojiMemoryGameViewModel: ObservableObject {
     typealias Card = MemoirizeGame<String>.Card
     
     //this is called a type property. It is created once
-    private static let emojis = ["👻", "💀", "👽", "🤖", "👾", "🕸", "🦕", "👑", "🌴", "🌍","🌈", "🚜", "🏀"]
+    private static let emojis = ["👻", "💀", "👽", "🤖", "👾", "🕸", "🦕", "👑", "🌴", "🌍","🌈", "🚜", "🏀", "👻", "💀", "👽", "🤖", "👾", "🕸", "🦕", "👑", "🌴", "🌍","🌈", "🚜", "🏀"]
 
     //this line makes the view model reactive. It's is because MemoirizeGame is a struct and swift detects changes in structs. Can't do this in classes
     //MARK: the @Published keyword automatically calls objectWillChange.send() anytime the model changes
@@ -27,7 +27,7 @@ class EmojiMemoryGameViewModel: ObservableObject {
     
     //this is called a type function
     private static func createMemoryGame() -> MemoirizeGame<String> {
-        MemoirizeGame<String>(numberOfPairsOfCards: 4) { pairIndex in
+        MemoirizeGame<String>(numberOfPairsOfCards: 18) { pairIndex in
             EmojiMemoryGameViewModel.emojis[pairIndex]
         }
     }
