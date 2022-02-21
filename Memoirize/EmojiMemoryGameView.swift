@@ -8,26 +8,29 @@
 import SwiftUI
 
 struct EmojiMemoryGameView: View {
-    //MARK: @ObservedObject says whenever something changes in this view model, rebuild the entire view 
+    //MARK: @ObservedObject says whenever something changes in this view model, rebuild the entire view
     @ObservedObject var gameViewModel: EmojiMemoryGameViewModel //this will be injected everywhere we create the EmojiMemoryGameView view
-        
+    
     var body: some View {
-        //        ScrollView {
-        //            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))]) {
-        //                ForEach(gameViewModel.cards) { card in
-        AspectVGrid(items: gameViewModel.cards, aspectRatio: 2/3, content: { card in
+        AspectVGrid(items: gameViewModel.cards, aspectRatio: 2/3) { card in
+            cardView(for: card)
+        }
+            .foregroundColor(.purple)
+            .padding(.horizontal)
+    }
+    
+    
+    @ViewBuilder
+    private func cardView(for card: EmojiMemoryGameViewModel.Card) -> some View {
+        if card.isMatched && !card.isFaceUp {
+            Rectangle().opacity(0)
+        }else {
             CardView(card: card)
                 .padding(4)
                 .onTapGesture {
                     gameViewModel.choose(card)
                 }
-        })
-        
-        //                }
-        //            }
-        //        }
-            .foregroundColor(.purple)
-            .padding(.horizontal)
+        }
     }
 }
 
