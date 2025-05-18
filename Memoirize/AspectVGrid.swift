@@ -66,3 +66,9 @@ struct AspectVGrid<Item, ItemView>: View where ItemView: View, Item: Identifiabl
 //        AspectVGrid()
 //    }
 //}
+
+struct Previews_AspectVGrid_Previews: PreviewProvider {
+    static var previews: some View {
+        /*@START_MENU_TOKEN@*/Text("Hello, World!")/*@END_MENU_TOKEN@*/
+    }
+}
