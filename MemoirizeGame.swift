@@ -8,81 +8,131 @@
 import Foundation
 import UIKit
 
-struct MemoirizeGame<CardContent> where CardContent: Equatable {
-    private(set)  var cards: Array<Card> //the game is made up of cards
+struct MemoryGame<CardContent> where CardContent: Equatable {
+    private(set) var cards: Array<Card>
+    private(set) var score = 0
     
-    //MARK: NOTE: a card can only match if and only if there is already one card that is facing up when you click another card
-    //optional because when you start the game the cards are all turned down initially
-    private var indexOfOneAndOnlyOneFaceUpCard: Int? {
-        get { return cards.indices.filter({cards[$0].isFaceUp}).oneAndOnly }
-        set { cards.indices.forEach { cards[$0].isFaceUp = ($0 == newValue) }}
+    init(numberOfPairsOfCards: Int, cardContentFactory: (Int) -> CardContent) {
+        cards = []
+        // add numberOfPairsOfCards x 2 cards
+        for pairIndex in 0..<max(2, numberOfPairsOfCards) {
+            let content = cardContentFactory(pairIndex)
+            cards.append(Card(content: content, id: "\(pairIndex+1)a"))
+            cards.append(Card(content: content, id: "\(pairIndex+1)b"))
+        }
     }
-
     
-    //MARK: a user can choose a card
+    var indexOfTheOneAndOnlyFaceUpCard: Int? {
+        get { cards.indices.filter { index in cards[index].isFaceUp }.only }
+        set { cards.indices.forEach { cards[$0].isFaceUp = (newValue == $0) } }
+    }
+    
     mutating func choose(_ card: Card) {
-        //Note we actually want to change the cards in the array above. So we have to find the card in this function in the cards above
-//        if let chosenIndex = indexOf(of: card) {
-//            cards[chosenIndex].isFaceUp.toggle()
-//            print("chosenCard \(cards)")
-//        }
-        
-        
-//        if let chosenIndex = cards.firstIndex(where: { aCardInTheCardsArray in aCardInTheCardsArray.id == card.id}) {
-//            //the above line reads as follows: look in the cards array and find the first index where that card's id is equal to my card's (the selected card) id
-//        }
-        
-        //the above if let with first index can be written simply as follows:
-        if let chosenIndex = cards.firstIndex(where: {$0.id == card.id }), !cards[chosenIndex].isFaceUp, !cards[chosenIndex].isMatched {
-            if let potentialMatchIndex = indexOfOneAndOnlyOneFaceUpCard {
-                if cards[chosenIndex].content == cards[potentialMatchIndex].content {
-                    cards[chosenIndex].isMatched = true
-                    cards[potentialMatchIndex].isMatched = true
+        if let chosenIndex = cards.firstIndex(where: { $0.id == card.id }) {
+            if !cards[chosenIndex].isFaceUp && !cards[chosenIndex].isMatched {
+                if let potentialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {
+                    if cards[chosenIndex].content == cards[potentialMatchIndex].content {
+                        cards[chosenIndex].isMatched = true
+                        cards[potentialMatchIndex].isMatched = true
+                        score += 2 + cards[chosenIndex].bonus + cards[potentialMatchIndex].bonus
+                    } else {
+                        if cards[chosenIndex].hasBeenSeen {
+                            score -= 1
+                        }
+                        if cards[potentialMatchIndex].hasBeenSeen {
+                            score -= 1
+                        }
+                    }
+                } else {
+                    indexOfTheOneAndOnlyFaceUpCard = chosenIndex
                 }
                 cards[chosenIndex].isFaceUp = true
-            } else {
-                indexOfOneAndOnlyOneFaceUpCard = chosenIndex
             }
         }
     }
     
-//    func indexOf(of card: Card) -> Int? {
-//        for index in 0..<cards.count {
-//            if cards[index].id == card.id {
-//                return index
-//            }
-//        }
-//        return nil
-//    }
-    
-    //MARK: we create this initialiser because we want every game to start by creating the cards
-    init(numberOfPairsOfCards: Int, createCardContent: (Int) -> CardContent) {
-        cards = []
-        //MARK: add numberOfPairsOfCards x 2 to cards array
-        for pairIndex in 0..<numberOfPairsOfCards {
-            let content = createCardContent(pairIndex)
-            cards.append(Card(id: pairIndex*2, content: content))
-            cards.append(Card(id: pairIndex*2+1, content: content))
-        }
+    mutating func shuffle() {
+        cards.shuffle()
     }
     
-    //MARK: Identifiable is an identifier that is able to distinguish between each card
-    struct Card: Identifiable {
-        let id: Int
-        //MARK: every game starts off with card faces down and not matched so set default values of the two to false
-        var isFaceUp = false
-        var isMatched = false
-        let content: CardContent //the content of a card can be anything. i.e emoji, image, an object of any type
+    struct Card: Equatable, Identifiable, CustomStringConvertible {
+        var isFaceUp = false {
+            didSet {
+                if isFaceUp {
+                    startUsingBonusTime()
+                } else {
+                    stopUsingBonusTime()
+                }
+                if oldValue && !isFaceUp {
+                    hasBeenSeen = true
+                }
+            }
+        }
+        var hasBeenSeen = false
+        var isMatched = false {
+            didSet {
+                if isMatched {
+                    stopUsingBonusTime()
+                }
+            }
+        }
+        let content: CardContent
+        
+        var id: String
+        var description: String {
+            "\(id): \(content) \(isFaceUp ? "up" : "down")\(isMatched ? " matched" : "")"
+        }
+        
+        // MARK: - Bonus Time
+        
+        // call this when the card transitions to face up state
+        private mutating func startUsingBonusTime() {
+            if isFaceUp && !isMatched && bonusPercentRemaining > 0, lastFaceUpDate == nil {
+                lastFaceUpDate = Date()
+            }
+        }
+        
+        // call this when the card goes back face down or gets matched
+        private mutating func stopUsingBonusTime() {
+            pastFaceUpTime = faceUpTime
+            lastFaceUpDate = nil
+        }
+        
+        // the bonus earned so far (one point for every second of the bonusTimeLimit that was not used)
+        // this gets smaller and smaller the longer the card remains face up without being matched
+        var bonus: Int {
+            Int(bonusTimeLimit * bonusPercentRemaining)
+        }
+        
+        // percentage of the bonus time remaining
+        var bonusPercentRemaining: Double {
+            bonusTimeLimit > 0 ? max(0, bonusTimeLimit - faceUpTime)/bonusTimeLimit : 0
+        }
+        
+        // how long this card has ever been face up and unmatched during its lifetime
+        // basically, pastFaceUpTime + time since lastFaceUpDate
+        var faceUpTime: TimeInterval {
+            if let lastFaceUpDate {
+                return pastFaceUpTime + Date().timeIntervalSince(lastFaceUpDate)
+            } else {
+                return pastFaceUpTime
+            }
+        }
+        
+        // can be zero which would mean "no bonus available" for matching this card quickly
+        var bonusTimeLimit: TimeInterval = 6
+        
+        // the last time this card was turned face up
+        var lastFaceUpDate: Date?
+        
+        // the accumulated time this card was face up in the past
+        // (i.e. not including the current time it's been face up if it is currently so)
+        var pastFaceUpTime: TimeInterval = 0
     }
 }
 
-
 extension Array {
-    var oneAndOnly: Element? {
-        if self.count == 1 {
-            return self.first
-        }else {
-            return nil
-        }
+    var only: Element? {
+        count == 1 ? first : nil
     }
 }
